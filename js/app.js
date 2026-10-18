@@ -66,7 +66,22 @@
     if (CJ.hoy() !== diaVisto) { diaVisto = CJ.hoy(); CJ.refrescar(); }
   }, 60 * 1000);
 
+  /* Actualización automática: si se publicó una versión nueva, se recarga sola (la iPad está fija en Acceso guiado).
+     Se navega a una URL distinta para saltarse la caché de Safari. */
+  CJ.VERSION = '4';
+  function revisarVersion() {
+    fetch('version.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+      var v = String(j.v || '');
+      if (!v || v === CJ.VERSION) return;
+      var intentos = 0;
+      try { intentos = +(sessionStorage.getItem('cj_act_' + v) || 0); sessionStorage.setItem('cj_act_' + v, intentos + 1); } catch (e) { /* nada */ }
+      if (intentos < 2) location.replace('index.html?v=' + encodeURIComponent(v));
+    }).catch(function () { /* sin internet: se intenta luego */ });
+  }
+  setInterval(revisarVersion, 30 * 60 * 1000);
+
   function arrancar() {
+    revisarVersion();
     CJ.db.abrir().then(CJ.cargar).then(function () {
       actualizarFecha();
       CJ.ir('hoy');

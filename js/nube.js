@@ -116,9 +116,11 @@ CJ.nube = (function () {
       entradas.push({ path: 'fotos/' + subir[j], mode: '100644', type: 'blob', sha: b.sha });
     }
 
-    /* 3. Quitar de la nube fotos que ya nadie usa */
+    /* 3. Quitar de la nube fotos que ya nadie usa. Solo los tipos que esta versión conoce:
+       una versión vieja de la app nunca debe borrar fotos de funciones nuevas que no entiende. */
+    var CONOCIDAS = /^fotos\/(p|d_|cara_|cuerpo_)/;
     Object.keys(remotos).forEach(function (p) {
-      if (p.indexOf('fotos/') === 0 && !refs[p.slice(6)]) entradas.push({ path: p, mode: '100644', type: 'blob', sha: null });
+      if (CONOCIDAS.test(p) && !refs[p.slice(6)]) entradas.push({ path: p, mode: '100644', type: 'blob', sha: null });
     });
 
     /* 4. Subir datos.json si hay cambios locales */
