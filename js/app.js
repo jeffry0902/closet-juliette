@@ -68,7 +68,7 @@
 
   /* Actualización automática: si se publicó una versión nueva, se recarga sola (la iPad está fija en Acceso guiado).
      Se navega a una URL distinta para saltarse la caché de Safari. */
-  CJ.VERSION = '5';
+  CJ.VERSION = '6';
   function revisarVersion() {
     fetch('version.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
       var v = String(j.v || '');

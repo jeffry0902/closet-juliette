@@ -44,25 +44,43 @@ CJ.munecaFoto = function (piezas, perfil, opts) {
   var C = 2, R = perfil.cuerpoRel || 2.9;
   var iw = 100, ih = 100, ox = 0, oy = 0;
   if (R >= C) { iw = C / R * 100; ox = (100 - iw) / 2; } else { ih = R / C * 100; oy = 100 - ih; }
-  /* Tops, vestidos y la parte de abajo toman el ancho del cuerpo y su alto natural (no quedan angostas);
-     zapatos y accesorios se ajustan dentro de su caja */
-  var ANCHO = { arriba: 0.9, vestido: 0.86, abajo: 1 };
-  function estilo(b, carril) {
-    var f = ANCHO[carril];
-    if (f) {
-      var c = (b[0] + b[2]) / 2, m = (b[2] - b[0]) * f / 2;
-      return ' style="left:' + (ox + (c - m) * iw).toFixed(2) + '%;top:' + (oy + b[1] * ih).toFixed(2) + '%;width:' + (2 * m * iw).toFixed(2) + '%;height:auto"';
-    }
-    return ' style="left:' + (ox + b[0] * iw).toFixed(2) + '%;top:' + (oy + b[1] * ih).toFixed(2) + '%;width:' +
-      ((b[2] - b[0]) * iw).toFixed(2) + '%;height:' + ((b[3] - b[1]) * ih).toFixed(2) + '%"';
-  }
   var cajas = perfil.cuerpoCajas;
+  /* Puntos del cuerpo (fracciones de la foto) deducidos de las cajas de estudio.py */
+  var cuerpo = {
+    hombro: cajas.arriba[1] + 0.01, cadera: cajas.arriba[3] - 0.01, cintura: cajas.abajo[1],
+    rodilla: cajas.vestido[3] - 0.08, tobillo: cajas.abajo[3] - 0.04,
+    cx: (cajas.abajo[0] + cajas.abajo[2]) / 2, ancho: (cajas.arriba[2] - cajas.arriba[0]) / 1.2
+  };
+  function hasta(largo) {
+    if (largo === 'corto') return cuerpo.cadera + (cuerpo.rodilla - cuerpo.cadera) * 0.45;
+    if (largo === 'midi') return (cuerpo.rodilla + cuerpo.tobillo) / 2;
+    if (largo === 'largo') return cuerpo.tobillo + 0.03;
+    return cuerpo.rodilla + 0.02;
+  }
+  function pos(b) {
+    return 'left:' + (ox + b[0] * iw).toFixed(2) + '%;top:' + (oy + b[1] * ih).toFixed(2) + '%;width:' +
+      ((b[2] - b[0]) * iw).toFixed(2) + '%;height:' + ((b[3] - b[1]) * ih).toFixed(2) + '%';
+  }
+  function img(p, clase, estilo) { return CJ.imgHtml(p.foto, clase, ' style="' + estilo + '"'); }
   function prenda(carril, id) {
     var p = CJ.prenda(id);
-    if (!p || !cajas[carril]) return '';
-    return CJ.imgHtml(p.foto, 'mf-' + carril, estilo(cajas[carril], carril));
+    if (!p) return '';
+    if (carril === 'arriba') {
+      /* Los tops toman el ancho de los hombros y su alto natural */
+      var m = cuerpo.ancho * 1.08 / 2;
+      return img(p, 'mf-arriba', 'left:' + (ox + (cuerpo.cx - m) * iw).toFixed(2) + '%;top:' + (oy + cajas.arriba[1] * ih).toFixed(2) +
+        '%;width:' + (2 * m * iw).toFixed(2) + '%;height:auto');
+    }
+    if (carril === 'vestido' || carril === 'abajo') {
+      /* Vestidos y prendas de abajo van del hombro (o la cintura) hasta su largo: rodilla, midi o tobillo */
+      var largo = p.largo || CJ.largoPorDefecto(p);
+      var arriba = carril === 'vestido' ? cajas.vestido[1] : cuerpo.cintura;
+      var m2 = cuerpo.ancho * (carril === 'vestido' ? 1.7 : 1.4) / 2;
+      return img(p, 'mf-' + carril, pos([cuerpo.cx - m2, arriba, cuerpo.cx + m2, hasta(largo)]));
+    }
+    return cajas[carril] ? img(p, 'mf-' + carril, pos(cajas[carril])) : '';
   }
-  var h = '<div class="muneca foto' + (opts.sombra ? ' sombra' : '') + '">' + CJ.imgHtml(perfil.cuerpo, 'mf-base', estilo([0, 0, 1, 1]));
+  var h = '<div class="muneca foto' + (opts.sombra ? ' sombra' : '') + '">' + CJ.imgHtml(perfil.cuerpo, 'mf-base', ' style="' + pos([0, 0, 1, 1]) + '"');
   if (piezas.vestido) h += prenda('vestido', piezas.vestido);
   else { h += prenda('abajo', piezas.abajo); h += prenda('arriba', piezas.arriba); }
   h += prenda('zapatos', piezas.zapatos);
@@ -71,6 +89,13 @@ CJ.munecaFoto = function (piezas, perfil, opts) {
   if (acc[1]) h += prenda('acc2', acc[1]);
   return h + '</div>';
 };
+
+/* Largo de vestidos, faldas y pantalones (se cambia en la ficha de la prenda) */
+CJ.LARGOS = [
+  { id: 'corto', nombre: 'Corto' }, { id: 'rodilla', nombre: 'A la rodilla' },
+  { id: 'midi', nombre: 'Midi' }, { id: 'largo', nombre: 'Largo (hasta los pies)' }
+];
+CJ.largoPorDefecto = function (p) { return p.cat === 'pantalones' ? 'largo' : 'rodilla'; };
 
 CJ.fotoDe = function (prendaId) { var p = CJ.prenda(prendaId); return p ? p.foto : ''; };
 

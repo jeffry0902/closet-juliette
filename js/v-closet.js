@@ -55,6 +55,7 @@
       '<div class="campo"><label>Categoría</label>' + CJ.chipsHtml(CJ.CATS, p.cat, 'cat') + '</div>' +
       '<div class="campo"><label>Ocasión (puedes marcar varias)</label>' + CJ.chipsHtml(CJ.OCAS, p.ocas || [], 'ocas', true) + '</div>' +
       '<div class="campo colores"><label>Color</label>' + CJ.chipsHtml(CJ.COLORES, p.color, 'color') + '</div>' +
+      (p.cat === 'vestidos' || p.cat === 'faldas' || p.cat === 'pantalones' ? '<div class="campo"><label>Largo (para verlo bien en el avatar)</label>' + CJ.chipsHtml(CJ.LARGOS, p.largo || CJ.largoPorDefecto(p), 'largo') + '</div>' : '') +
       '<div class="campo"><label>Marca (opcional)</label><input class="entrada" id="f-marca" value="' + CJ.esc(p.marca || '') + '" placeholder="Zara, Nike, H&M…"></div>' +
       '<div class="campo"><label>Nombre (opcional)</label><input class="entrada" id="f-nombre" value="' + CJ.esc(p.nombre || '') + '" placeholder="Ej: blusa de lino favorita"></div>' +
       '</div></div>' +
@@ -64,7 +65,7 @@
     var m = CJ.modal(h);
     var img = CJ.$('img.grande', m.el);
     CJ.cargarFoto(p.foto).then(function (d) { if (d) img.src = d; });
-    var cambios = { cat: p.cat, ocas: (p.ocas || []).slice(), color: p.color };
+    var cambios = { cat: p.cat, ocas: (p.ocas || []).slice(), color: p.color, largo: p.largo || CJ.largoPorDefecto(p) };
     CJ.activarChips(m.el, function (g, v) { cambios[g] = g === 'ocas' ? v : v[0]; });
     m.el.addEventListener('click', function (e) {
       var b = e.target.closest('[data-x]');
@@ -72,7 +73,7 @@
       var x = b.getAttribute('data-x');
       if (x === 'guardar') {
         var n = CJ.copiar(p);
-        n.cat = cambios.cat; n.ocas = cambios.ocas; n.color = cambios.color;
+        n.cat = cambios.cat; n.ocas = cambios.ocas; n.color = cambios.color; n.largo = cambios.largo;
         n.marca = CJ.$('#f-marca', m.el).value.trim();
         n.nombre = CJ.$('#f-nombre', m.el).value.trim();
         CJ.datos.prendas[id] = CJ.tocar(n);

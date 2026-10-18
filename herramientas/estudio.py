@@ -539,7 +539,7 @@ def subir_pendientes(salida, registro, registro_ruta, solo_lote=False):
         for pid, p in prendas.items():
             previa = datos["prendas"].get(pid)
             if previa:  # se conservan las ediciones hechas en la iPad (ocasión, marca…)
-                p = {**p, **{k: previa[k] for k in ("cat", "ocas", "color", "marca", "nombre", "notas") if previa.get(k)}}
+                p = {**p, **{k: previa[k] for k in ("cat", "ocas", "color", "marca", "nombre", "notas", "largo") if previa.get(k)}}
             datos["prendas"][pid] = {**p, "act": ahora_ms()}
             datos["borrados"].pop("prendas:" + pid, None)
         return datos, fotos
