@@ -111,8 +111,8 @@ CJ.img = (function () {
     });
   }
 
-  function hacerMini(data) {
-    return cargar(data).then(function (im) { return aData(dibujar(im, MAX_MINI, 1), esPng(data), 0.8); });
+  function hacerMini(data, max) {
+    return cargar(data).then(function (im) { return aData(dibujar(im, max || MAX_MINI, 1), esPng(data), 0.8); });
   }
 
   /* Recorte cuadrado para la cara del avatar (cuando no viene recortada desde la PC) */

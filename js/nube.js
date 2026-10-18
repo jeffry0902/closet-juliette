@@ -101,7 +101,7 @@ CJ.nube = (function () {
       var id = faltan[i];
       var mime = /\.png$/i.test(id) ? 'image/png' : 'image/jpeg';
       var data = 'data:' + mime + ';base64,' + await blob(remotos['fotos/' + id]);
-      var mini = await CJ.img.hacerMini(data);
+      var mini = await CJ.img.hacerMini(data, CJ.ladoMini(id));
       await CJ.guardarFoto(id, data, mini);
     }
 

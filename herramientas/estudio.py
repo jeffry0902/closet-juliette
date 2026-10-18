@@ -11,6 +11,7 @@ Comandos:
   python estudio.py config                    Configura la nube (una sola vez)
   python estudio.py prendas CARPETA [opciones] Procesa y sube prendas
   python estudio.py avatar FOTO               Recorta la cara para el avatar y la sube
+  python estudio.py cuerpo FOTO               Foto de cuerpo completo como avatar (recomendado)
   python estudio.py subir CARPETA             Reintenta subir lo que quedó pendiente
 
 Organización de CARPETA (el nombre de cada subcarpeta indica la categoría,
@@ -586,6 +587,79 @@ def cmd_avatar(args):
     print("✓ Avatar subido a la nube.")
 
 
+# ---------------------------------------------------------------- cuerpo completo
+
+def hacer_cuerpo(ruta):
+    """Foto de cuerpo completo sin fondo + cajas donde va cada prenda (fracciones de la imagen)."""
+    im = abrir_foto(ruta)
+    im.thumbnail((2000, 2000), Image.LANCZOS)
+    rgba = quitar_fondo(im, "isnet-general-use")
+    a = rgba.getchannel("A").point(lambda v: 0 if v < 24 else (255 if v > 232 else v))
+    rgba.putalpha(a.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8)))
+    caja = rgba.getchannel("A").point(lambda v: 255 if v > 40 else 0).getbbox()
+    if not caja:
+        raise ValueError("no encontré a la persona en la foto")
+    rgba = reducir(rgba.crop(caja), 1600)
+    return rgba, calcular_cajas(rgba)
+
+
+def calcular_cajas(rgba):
+    W, H = rgba.size
+    alfa = rgba.getchannel("A").load()
+
+    def tramo(y):
+        xs = [x for x in range(0, W, 2) if alfa[x, min(H - 1, y)] > 128]
+        return (xs[0], xs[-1]) if xs else (0, W)
+
+    cabeza = [tramo(int(H * f / 100)) for f in range(5, 16)]
+    ancho_cabeza = sorted(b - a for a, b in cabeza)[len(cabeza) // 2]
+    cx = sorted((a + b) / 2 for a, b in cabeza)[len(cabeza) // 2] / W
+    hombro = 0.2
+    for f in range(8, 40):
+        a, b = tramo(int(H * f / 100))
+        if b - a > 1.6 * ancho_cabeza:
+            hombro = f / 100
+            break
+    sx0, sx1 = (v / W for v in tramo(int(H * (hombro + 0.03))))
+    sw = sx1 - sx0
+    L = 1 - hombro  # de los hombros a los pies
+    cintura, cadera, rodilla, tobillo = (hombro + k * L for k in (0.24, 0.40, 0.64, 0.85))
+    r = lambda *v: [round(x, 3) for x in v]
+    return {
+        "arriba": r(sx0 - 0.10 * sw, hombro - 0.01, sx1 + 0.10 * sw, cadera + 0.01),
+        "vestido": r(sx0 - 0.12 * sw, hombro - 0.01, sx1 + 0.12 * sw, rodilla + 0.08),
+        "abajo": r(cx - 0.52 * sw, cintura, cx + 0.52 * sw, tobillo + 0.04),
+        "zapatos": r(cx - 0.55 * sw, tobillo + 0.01, cx + 0.55 * sw, 1.0),
+        "acc": r(sx1 - 0.05 * sw, cadera - 0.08, sx1 + 0.30 * sw, cadera + 0.12),
+        "acc2": r(sx0 - 0.30 * sw, cadera - 0.08, sx0 + 0.05 * sw, cadera + 0.12),
+    }
+
+
+def cmd_cuerpo(args):
+    ruta = Path(args.foto)
+    print("Quitando el fondo de la foto de cuerpo completo…")
+    rgba, cajas = hacer_cuerpo(ruta)
+    png = png_liviano(rgba, paleta=False)
+    destino = ruta.with_name(ruta.stem + "-cuerpo.png")
+    destino.write_bytes(png)
+    print(f"✓ Guardado {destino} ({len(png) // 1024} KB)")
+    conf = leer_config()
+    if args.lote or not conf:
+        print("La nube no está configurada: no se subió.")
+        return
+    fid = nuevo_id("cuerpo_") + ".png"
+
+    def aplicar(datos):
+        datos = {**vacio(), **datos}
+        perfil = dict(datos.get("perfil") or {})
+        perfil.update({"cuerpo": fid, "cuerpoRel": round(rgba.height / rgba.width, 4), "cuerpoCajas": cajas, "act": ahora_ms()})
+        datos["perfil"] = perfil
+        return datos, {fid: png}
+
+    Nube(conf).publicar(aplicar, "Estudio PC: foto de cuerpo completo del avatar")
+    print("✓ Avatar de cuerpo completo subido. En la iPad toca la nube ☁️.")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Estudio del Clóset de Juliette", formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -605,12 +679,15 @@ def main():
     a = sub.add_parser("avatar", help="recortar la cara para el avatar")
     a.add_argument("foto")
     a.add_argument("--lote", action="store_true")
+    c = sub.add_parser("cuerpo", help="foto de cuerpo completo para el avatar")
+    c.add_argument("foto")
+    c.add_argument("--lote", action="store_true")
     s = sub.add_parser("subir", help="subir lo pendiente")
     s.add_argument("carpeta")
     s.add_argument("--lote", action="store_true")
     args = ap.parse_args()
     try:
-        {"config": cmd_config, "prendas": cmd_prendas, "avatar": cmd_avatar, "subir": cmd_subir}[args.cmd](args)
+        {"config": cmd_config, "prendas": cmd_prendas, "avatar": cmd_avatar, "cuerpo": cmd_cuerpo, "subir": cmd_subir}[args.cmd](args)
     except ErrorNube as e:
         print("✗", e)
         if e.estado == 401:

@@ -365,3 +365,10 @@ textarea.entrada { height: 130px; padding: 12px 16px; line-height: 1.35; }
 .modal .escenario { max-width: 380px; margin: 0 auto; }
 .detalle-img .escenario { max-width: none; }
 .semana-mini .muneca, .outfit-tarjeta .muneca { max-width: 100%; }
+
+/* Muñeca con foto real de cuerpo completo */
+.muneca.foto .mf-base { z-index: 1; }
+.muneca.foto .mf-abajo { z-index: 2; object-position: 50% 0; }
+.muneca.foto .mf-zapatos { z-index: 3; object-position: 50% 100%; }
+.muneca.foto .mf-arriba, .muneca.foto .mf-vestido { z-index: 4; object-position: 50% 0; }
+.muneca.foto .mf-acc, .muneca.foto .mf-acc2 { z-index: 7; }

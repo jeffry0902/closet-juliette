@@ -26,6 +26,9 @@
 
   CJ.mini = function (id) { return CJ.minisCache[id] || null; };
 
+  /* La foto de cuerpo completo del avatar necesita una miniatura más grande */
+  CJ.ladoMini = function (id) { return /^cuerpo_/.test(id || '') ? 1000 : 360; };
+
   CJ.cargarFoto = function (id) {
     if (!id) return Promise.resolve(null);
     if (cacheGrande[id]) return Promise.resolve(cacheGrande[id]);
@@ -131,6 +134,7 @@
     for (id in d.prendas) if (d.prendas[id].foto) s[d.prendas[id].foto] = 1;
     for (id in d.dias) (d.dias[id].looks || []).forEach(function (l) { if (l.foto) s[l.foto] = 1; });
     if (d.perfil && d.perfil.cara) s[d.perfil.cara] = 1;
+    if (d.perfil && d.perfil.cuerpo) s[d.perfil.cuerpo] = 1;
     return s;
   };
 
@@ -274,7 +278,7 @@
       pasos = pasos.then(function () {
         if (!reemplazar && CJ.minisCache[id]) { hechas++; return; }
         var data = obj.fotos[id];
-        return CJ.img.hacerMini(data).then(function (mini) {
+        return CJ.img.hacerMini(data, CJ.ladoMini(id)).then(function (mini) {
           hechas++;
           if (progreso) progreso(hechas, ids.length);
           return CJ.guardarFoto(id, data, mini);

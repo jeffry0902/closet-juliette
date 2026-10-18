@@ -190,6 +190,8 @@
         'Desde aquí también puedes elegir una foto (se verá en círculo).</div>' +
         '<button class="btn btn-pri btn-ancho" data-acc="avatar-cara">📷 Elegir foto de la cara</button>' +
         (perfil.cara ? '<button class="btn btn-ancho" data-acc="avatar-quitar">Quitar cara</button>' : '') +
+        (perfil.cuerpo ? '<div class="aviso aviso-ok mt">✅ Usando tu foto de cuerpo completo. Para cambiarla: <b>estudio.py cuerpo foto.jpg</b> en la PC.</div>' +
+          '<button class="btn btn-ancho" data-acc="avatar-quitar-cuerpo">Volver a la muñeca dibujada</button>' : '') +
         '<h3 class="mt">Tono de piel</h3><div class="chips">' + PIELES.map(function (p) {
           return '<button class="chip' + (perfil.piel === p ? ' on' : '') + '" data-acc="avatar-piel" data-p="' + p + '"><span class="bolita" style="background:' + p + ';margin:0"></span></button>';
         }).join('') + '</div></div></div>';
@@ -205,6 +207,11 @@
   }
   CJ.acc['avatar-piel'] = function (el) { guardarPerfil({ piel: el.getAttribute('data-p') }); };
   CJ.acc['avatar-quitar'] = function () { guardarPerfil({ cara: null, caraRecortada: false }); };
+  CJ.acc['avatar-quitar-cuerpo'] = function () {
+    return CJ.confirmar('¿Volver a la muñeca dibujada?', 'Tu foto de cuerpo completo se borra del clóset.', 'Sí, quitarla').then(function (si) {
+      if (si) guardarPerfil({ cuerpo: null, cuerpoCajas: null, cuerpoRel: null });
+    });
+  };
   CJ.acc['avatar-cara'] = function () {
     return CJ.elegirArchivos({ accept: 'image/*' }).then(function (a) {
       if (!a.length) return;

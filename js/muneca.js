@@ -4,6 +4,7 @@ CJ.muneca = function (piezas, opts) {
   piezas = piezas || CJ.piezasVacias();
   var perfil = CJ.datos.perfil || {};
   var piel = perfil.piel || '#e8b897';
+  if (!opts.sinCuerpo && perfil.cuerpo && perfil.cuerpoCajas && CJ.mini(perfil.cuerpo)) return CJ.munecaFoto(piezas, perfil, opts);
   var conCara = !!(perfil.cara && CJ.mini(perfil.cara));
   var h = '<div class="muneca' + (opts.sinCuerpo ? ' sin-cuerpo' : '') + (opts.sombra ? ' sombra' : '') + '">';
   if (!opts.sinCuerpo) {
@@ -34,6 +35,32 @@ CJ.muneca = function (piezas, opts) {
   var acc = (piezas.acc || []).filter(function (id) { return CJ.prenda(id); });
   if (acc[0]) h += CJ.imgHtml(CJ.fotoDe(acc[0]), 'm-acc');
   if (acc[1]) h += CJ.imgHtml(CJ.fotoDe(acc[1]), 'm-acc2');
+  return h + '</div>';
+};
+
+/* Muñeca con la foto real de cuerpo completo: las prendas van en las cajas que calculó estudio.py.
+   El contenedor mide 1:2; la foto se centra dentro y las cajas se convierten a % del contenedor. */
+CJ.munecaFoto = function (piezas, perfil, opts) {
+  var C = 2, R = perfil.cuerpoRel || 2.9;
+  var iw = 100, ih = 100, ox = 0, oy = 0;
+  if (R >= C) { iw = C / R * 100; ox = (100 - iw) / 2; } else { ih = R / C * 100; oy = 100 - ih; }
+  function estilo(b) {
+    return ' style="left:' + (ox + b[0] * iw).toFixed(2) + '%;top:' + (oy + b[1] * ih).toFixed(2) + '%;width:' +
+      ((b[2] - b[0]) * iw).toFixed(2) + '%;height:' + ((b[3] - b[1]) * ih).toFixed(2) + '%"';
+  }
+  var cajas = perfil.cuerpoCajas;
+  function prenda(carril, id) {
+    var p = CJ.prenda(id);
+    if (!p || !cajas[carril]) return '';
+    return CJ.imgHtml(p.foto, 'mf-' + carril, estilo(cajas[carril]));
+  }
+  var h = '<div class="muneca foto' + (opts.sombra ? ' sombra' : '') + '">' + CJ.imgHtml(perfil.cuerpo, 'mf-base', estilo([0, 0, 1, 1]));
+  if (piezas.vestido) h += prenda('vestido', piezas.vestido);
+  else { h += prenda('abajo', piezas.abajo); h += prenda('arriba', piezas.arriba); }
+  h += prenda('zapatos', piezas.zapatos);
+  var acc = (piezas.acc || []).filter(function (id) { return CJ.prenda(id); });
+  if (acc[0]) h += prenda('acc', acc[0]);
+  if (acc[1]) h += prenda('acc2', acc[1]);
   return h + '</div>';
 };
 
