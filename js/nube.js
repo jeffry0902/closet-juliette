@@ -44,6 +44,9 @@ CJ.nube = (function () {
     });
   }
 
+  /* La foto de cuerpo completo vive en avatar/: las versiones viejas de la app solo limpian fotos/ */
+  function ruta(id) { return (/^cuerpo_/.test(id) ? 'avatar/' : 'fotos/') + id; }
+
   function utf8B64(s) { return btoa(unescape(encodeURIComponent(s))); }
   function b64Utf8(b) { return decodeURIComponent(escape(atob(b.replace(/\s/g, '')))); }
 
@@ -95,32 +98,32 @@ CJ.nube = (function () {
 
     /* 1. Bajar fotos que faltan en este dispositivo */
     var refs = CJ.fotosReferenciadas(fusion);
-    var faltan = Object.keys(refs).filter(function (id) { return !CJ.minisCache[id] && remotos['fotos/' + id]; });
+    var faltan = Object.keys(refs).filter(function (id) { return !CJ.minisCache[id] && remotos[ruta(id)]; });
     for (var i = 0; i < faltan.length; i++) {
       if (progreso) progreso('Bajando fotos ' + (i + 1) + ' de ' + faltan.length);
       var id = faltan[i];
       var mime = /\.png$/i.test(id) ? 'image/png' : 'image/jpeg';
-      var data = 'data:' + mime + ';base64,' + await blob(remotos['fotos/' + id]);
+      var data = 'data:' + mime + ';base64,' + await blob(remotos[ruta(id)]);
       var mini = await CJ.img.hacerMini(data, CJ.ladoMini(id));
       await CJ.guardarFoto(id, data, mini);
     }
 
     /* 2. Subir fotos nuevas de este dispositivo */
     var entradas = [];
-    var subir = Object.keys(refs).filter(function (id) { return !remotos['fotos/' + id] && CJ.minisCache[id]; });
+    var subir = Object.keys(refs).filter(function (id) { return !remotos[ruta(id)] && CJ.minisCache[id]; });
     for (var j = 0; j < subir.length; j++) {
       if (progreso) progreso('Subiendo fotos ' + (j + 1) + ' de ' + subir.length);
       var d = await CJ.cargarFoto(subir[j]);
       if (!d) continue;
       var b = await api('POST', '/git/blobs', { content: d.split(',')[1], encoding: 'base64' });
-      entradas.push({ path: 'fotos/' + subir[j], mode: '100644', type: 'blob', sha: b.sha });
+      entradas.push({ path: ruta(subir[j]), mode: '100644', type: 'blob', sha: b.sha });
     }
 
     /* 3. Quitar de la nube fotos que ya nadie usa. Solo los tipos que esta versión conoce:
        una versión vieja de la app nunca debe borrar fotos de funciones nuevas que no entiende. */
-    var CONOCIDAS = /^fotos\/(p|d_|cara_|cuerpo_)/;
+    var CONOCIDAS = /^(fotos\/(p|d_|cara_)|avatar\/cuerpo_)/;
     Object.keys(remotos).forEach(function (p) {
-      if (CONOCIDAS.test(p) && !refs[p.slice(6)]) entradas.push({ path: p, mode: '100644', type: 'blob', sha: null });
+      if (CONOCIDAS.test(p) && !refs[p.slice(p.indexOf('/') + 1)]) entradas.push({ path: p, mode: '100644', type: 'blob', sha: null });
     });
 
     /* 4. Subir datos.json si hay cambios locales */

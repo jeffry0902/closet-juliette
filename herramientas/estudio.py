@@ -388,7 +388,7 @@ class Nube:
             datos_nuevos, fotos = aplicar(datos)
             entradas = []
             for i, (fid, contenido) in enumerate(fotos.items(), 1):
-                ruta = "fotos/" + fid
+                ruta = ("avatar/" if fid.startswith("cuerpo_") else "fotos/") + fid  # las versiones viejas de la app solo limpian fotos/
                 if ruta in remotos:
                     continue
                 print(f"  subiendo foto {i}/{len(fotos)}", end="\r")
