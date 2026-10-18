@@ -1,0 +1,6 @@
+rembg[cpu]>=2.0.60
+pillow>=10.4
+pillow-heif>=0.18
+opencv-python-headless>=4.9
+requests>=2.31
+anthropic>=0.70

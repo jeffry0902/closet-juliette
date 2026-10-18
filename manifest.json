@@ -1,0 +1,13 @@
+{
+  "name": "Clóset de Juliette",
+  "short_name": "Clóset J",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff7fb",
+  "theme_color": "#ffd93b",
+  "icons": [
+    { "src": "img/icono-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "img/icono-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

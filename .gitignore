@@ -1,0 +1,11 @@
+# Fotos personales y resultados del estudio: nunca al repo público
+herramientas/fotos/
+**/_listas/
+*.heic
+lote-*.json
+closet-juliette-*.json
+.closet-juliette.json
+node_modules/
+__pycache__/
+.venv/
+venv/

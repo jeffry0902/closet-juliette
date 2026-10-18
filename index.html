@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Clóset J">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#ffd93b">
+<title>Clóset de Juliette</title>
+<link rel="apple-touch-icon" href="img/icono-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="img/icono-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="img/icono-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="img/icono-180.png">
+<link rel="apple-touch-startup-image" href="img/inicio-1536x2048.png"
+      media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+<link rel="icon" type="image/png" href="img/icono-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fredoka+One&display=swap">
+<!-- El overlay de errores va primero, en ES5, para atrapar hasta errores de sintaxis de los demás archivos -->
+<script src="js/errores.js?v=1"></script>
+<link rel="stylesheet" href="css/app.css?v=1">
+</head>
+<body>
+<div id="app">
+  <header id="cabecera">
+    <div class="cab-izq">
+      <div class="titulo">Clóset de Juliette</div>
+      <div class="subtitulo" id="cab-fecha"></div>
+    </div>
+    <button class="nube-estado" id="nube-estado" data-acc="nube-sync">☁️</button>
+  </header>
+
+  <main id="principal">
+    <section class="vista" id="v-hoy"></section>
+    <section class="vista" id="v-closet"></section>
+    <section class="vista" id="v-armar"></section>
+    <section class="vista" id="v-calendario"></section>
+    <section class="vista" id="v-mas"></section>
+    <section class="vista" id="v-favoritos"></section>
+    <section class="vista" id="v-semana"></section>
+    <section class="vista" id="v-estadisticas"></section>
+    <section class="vista" id="v-estilista"></section>
+    <section class="vista" id="v-avatar"></section>
+    <section class="vista" id="v-ajustes"></section>
+  </main>
+
+  <nav id="nav">
+    <button class="tab" data-acc="ir" data-v="hoy"><span class="tab-ico">☀️</span><span class="tab-txt">Hoy</span></button>
+    <button class="tab" data-acc="ir" data-v="closet"><span class="tab-ico">👚</span><span class="tab-txt">Clóset</span></button>
+    <button class="tab" data-acc="ir" data-v="armar"><span class="tab-ico">✨</span><span class="tab-txt">Armar</span></button>
+    <button class="tab" data-acc="ir" data-v="calendario"><span class="tab-ico">📅</span><span class="tab-txt">Calendario</span></button>
+    <button class="tab" data-acc="ir" data-v="mas"><span class="tab-ico">💖</span><span class="tab-txt">Más</span></button>
+  </nav>
+</div>
+
+<div id="toasts"></div>
+<!-- iOS 12 no abre inputs con display:none; se esconde fuera de la pantalla -->
+<input type="file" id="archivo-oculto" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0">
+
+
+<script src="js/base.js?v=1"></script>
+<script src="js/db.js?v=1"></script>
+<script src="js/datos.js?v=1"></script>
+<script src="js/imagen.js?v=1"></script>
+<script src="js/nube.js?v=1"></script>
+<script src="js/ia.js?v=1"></script>
+<script src="js/motor.js?v=1"></script>
+<script src="js/muneca.js?v=1"></script>
+<script src="js/v-hoy.js?v=1"></script>
+<script src="js/v-closet.js?v=1"></script>
+<script src="js/v-armar.js?v=1"></script>
+<script src="js/v-calendario.js?v=1"></script>
+<script src="js/v-mas.js?v=1"></script>
+<script src="js/v-estilista.js?v=1"></script>
+<script src="js/v-ajustes.js?v=1"></script>
+<script src="js/app.js?v=1"></script>
+</body>
+</html>
