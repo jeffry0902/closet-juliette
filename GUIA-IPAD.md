@@ -128,12 +128,12 @@ El script `herramientas/estudio.py` toma las fotos que sacas con el celular y ha
 5. **Las sube a la nube privada**: en la iPad aparecen solas.
 
 ### 4.1 Instalación (una vez)
-1. Instala **Python 3.12** desde <https://www.python.org/downloads/>. En el instalador marca **"Add python.exe to PATH"**.
+1. Instala **Python 3.12 o 3.13** desde <https://www.python.org/downloads/>. En el instalador marca **"Add python.exe to PATH"**.
 2. Descarga este proyecto: en GitHub, **Code → Download ZIP**, y descomprímelo (por ejemplo, en `C:\closet-juliette`).
 3. Abre **PowerShell** y escribe:
    ```powershell
    cd C:\closet-juliette\herramientas
-   py -3.12 -m venv .venv
+   py -m venv .venv
    .\.venv\Scripts\Activate.ps1
    pip install -r requirements.txt
    python estudio.py config
