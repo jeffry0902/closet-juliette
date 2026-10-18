@@ -66,10 +66,10 @@ CJ.munecaFoto = function (piezas, perfil, opts) {
     var p = CJ.prenda(id);
     if (!p) return '';
     if (carril === 'arriba') {
-      /* Los tops toman el ancho de los hombros y su alto natural */
+      /* Los tops toman el ancho de los hombros y su alto natural, pero no pasan de la cadera (no tapan la falda) */
       var m = cuerpo.ancho * 1.08 / 2;
       return img(p, 'mf-arriba', 'left:' + (ox + (cuerpo.cx - m) * iw).toFixed(2) + '%;top:' + (oy + cajas.arriba[1] * ih).toFixed(2) +
-        '%;width:' + (2 * m * iw).toFixed(2) + '%;height:auto');
+        '%;width:' + (2 * m * iw).toFixed(2) + '%;height:auto;max-height:' + ((cuerpo.cadera + 0.05 - cajas.arriba[1]) * ih).toFixed(2) + '%');
     }
     if (carril === 'vestido' || carril === 'abajo') {
       /* Vestidos y prendas de abajo van del hombro (o la cintura) hasta su largo: rodilla, midi o tobillo */

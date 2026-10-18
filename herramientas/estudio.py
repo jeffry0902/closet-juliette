@@ -142,6 +142,31 @@ def limpiar_alfa(rgba):
     return rgba
 
 
+def quitar_ganchos(rgba):
+    """Quita el gancho de colgar (y cualquier hilo fino) que sobresale arriba o abajo de la prenda:
+    filas donde lo opaco ocupa menos del 8 % del ancho máximo."""
+    a = rgba.getchannel("A")
+    caja = a.point(lambda v: 255 if v > 40 else 0).getbbox()
+    if not caja:
+        return rgba
+    rgba = rgba.crop(caja)
+    w, h = rgba.size
+    peq = rgba.getchannel("A").resize((max(1, w // 4), max(1, h // 4)))
+    pw, ph = peq.size
+    px = peq.load()
+    anchos = [sum(1 for x in range(pw) if px[x, y] > 128) for y in range(ph)]
+    limite = max(anchos) * 0.08
+    arriba = 0
+    while arriba < ph // 3 and anchos[arriba] < limite:
+        arriba += 1
+    abajo = ph
+    while abajo > ph * 2 // 3 and anchos[abajo - 1] < limite:
+        abajo -= 1
+    if arriba or abajo < ph:
+        rgba = rgba.crop((0, arriba * 4, w, min(h, abajo * 4)))
+    return rgba
+
+
 def recortar_ajustado(rgba, margen=0.035):
     caja = rgba.getchannel("A").point(lambda v: 255 if v > 40 else 0).getbbox()
     if not caja:
@@ -223,6 +248,7 @@ def procesar_prenda(ruta, args):
     im.thumbnail((1600, 1600), Image.LANCZOS)  # rembg es más rápido y no pierde calidad útil
     rgba = quitar_fondo(im, args.modelo, args.bordes_finos)
     rgba = limpiar_alfa(rgba)
+    rgba = quitar_ganchos(rgba)
     rgba = recortar_ajustado(rgba)
     rgba = embellecer_color(rgba)
     if args.sombra:
