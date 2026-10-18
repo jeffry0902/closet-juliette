@@ -44,7 +44,15 @@ CJ.munecaFoto = function (piezas, perfil, opts) {
   var C = 2, R = perfil.cuerpoRel || 2.9;
   var iw = 100, ih = 100, ox = 0, oy = 0;
   if (R >= C) { iw = C / R * 100; ox = (100 - iw) / 2; } else { ih = R / C * 100; oy = 100 - ih; }
-  function estilo(b) {
+  /* Tops, vestidos y la parte de abajo toman el ancho del cuerpo y su alto natural (no quedan angostas);
+     zapatos y accesorios se ajustan dentro de su caja */
+  var ANCHO = { arriba: 0.9, vestido: 0.86, abajo: 1 };
+  function estilo(b, carril) {
+    var f = ANCHO[carril];
+    if (f) {
+      var c = (b[0] + b[2]) / 2, m = (b[2] - b[0]) * f / 2;
+      return ' style="left:' + (ox + (c - m) * iw).toFixed(2) + '%;top:' + (oy + b[1] * ih).toFixed(2) + '%;width:' + (2 * m * iw).toFixed(2) + '%;height:auto"';
+    }
     return ' style="left:' + (ox + b[0] * iw).toFixed(2) + '%;top:' + (oy + b[1] * ih).toFixed(2) + '%;width:' +
       ((b[2] - b[0]) * iw).toFixed(2) + '%;height:' + ((b[3] - b[1]) * ih).toFixed(2) + '%"';
   }
@@ -52,7 +60,7 @@ CJ.munecaFoto = function (piezas, perfil, opts) {
   function prenda(carril, id) {
     var p = CJ.prenda(id);
     if (!p || !cajas[carril]) return '';
-    return CJ.imgHtml(p.foto, 'mf-' + carril, estilo(cajas[carril]));
+    return CJ.imgHtml(p.foto, 'mf-' + carril, estilo(cajas[carril], carril));
   }
   var h = '<div class="muneca foto' + (opts.sombra ? ' sombra' : '') + '">' + CJ.imgHtml(perfil.cuerpo, 'mf-base', estilo([0, 0, 1, 1]));
   if (piezas.vestido) h += prenda('vestido', piezas.vestido);
